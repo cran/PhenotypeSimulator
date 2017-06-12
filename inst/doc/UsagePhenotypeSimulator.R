@@ -19,7 +19,8 @@ kinship <- getKinship(genotypes$X_sd, norm=TRUE, verbose = FALSE)
 genBg <- geneticBgEffects(kinship = kinship, P = 15)
 noiseBg <- noiseBgEffects(N = 100, P = 15)
 
-# combine components into final phenotype with genetic variance component explaining 40% of total variance
+# combine components into final phenotype with genetic variance component 
+# explaining 40% of total variance
 phenotype <- createPheno(N = 100, P = 15, noiseBg = noiseBg, genBg = genBg, 
                          modelNoise = modelNoise, modelGenetic = modelGenetic, 
                          genVar = 0.4, verbose = FALSE)
@@ -91,7 +92,7 @@ phenotype <- createPheno(N = 100, P = 15, noiseBg = noiseBg,
                          genVar = totalGeneticVar, h2s = h2s, phi = 0.6, 
                          rho = 0.1, delta = 0.3, gamma = 1,  verbose = FALSE)
 
-## ------------------------------------------------------------------------
+## ---- tidy=TRUE, tidy.opts = list(width.cutoff = 60)---------------------
 ### via `runSimulation`
 
 # simulate phenotype with the same five phenotype components and settings as 
@@ -188,7 +189,7 @@ causalSNPsFromFile <- getCausalSNPs(NrCausalSNPs = 10, chr = 22,
 ## ---- fig.show='hold'----------------------------------------------------
 # create genetic fixed effects with 20% of SNPs having a specific effect, 
 # affecting 40% of all simulated traits
-fixedGenetic <- geneticFixedEffects(X_causal = causalSNPs, N = 100, P = 20, 
+fixedGenetic <- geneticFixedEffects(X_causal = causalSNPs, N = 100, P = 10, 
                                     pIndependentGenetic = 0.2, 
                                     pTraitIndependentGenetic = 0.4)
 
@@ -251,7 +252,7 @@ fixedNoiseBinomial <- noiseFixedEffects(N = 100, P = 10, NrConfounders = 1,
                                         distConfounders = "bin", 
                                         probConfounders = 0.5)
 
-## ---- fig.show='hold', echo=FALSE, fig.height=3.4, fig.width=3.4---------
+## ---- fig.show='hold', echo=FALSE, fig.height=3.5, fig.width=4-----------
 image(fixedNoiseUniform$independent, 
       main="Independent fixed noise effects\n(uniform confounder dist)", 
       axes=FALSE,  cex.main=0.8)
@@ -263,6 +264,7 @@ image(fixedNoiseNormal$shared,
       axes=FALSE, cex.main=0.8)
 mtext(side = 1, text = "Samples", line = 1)
 mtext(side = 2, text = "Traits", line = 1)
+
 image(fixedNoiseNormal$independent, 
       main="Independent fixed noise effects\n(normal confounder dist)", 
       axes=FALSE, cex.main=0.8)
@@ -284,7 +286,7 @@ correlatedNoise <- correlatedBgEffects(N = 100, P = 10, pcorr = 0.8 )
 # little correlation at the furthest distance to the diagonal 
 furthestDistCorr <- 0.4^(10-1)
 pairs(correlatedNoise, pch = ".", 
-      main=paste("Correlation at furthest distance to diagonal:",
+      main=paste("Correlation at furthest distance to diagonal:\n",
                  furthestDistCorr), cex.main=0.8)
 image(correlatedNoise, main="Correlated noise effects",  axes=FALSE, 
       cex.main=0.8)
