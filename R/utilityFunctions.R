@@ -4,11 +4,11 @@
 #' printing of messages to standard out.
 #' on or off
 #'
-#' @param userinfo string or vector of string elements and variables
-#' @param verbose [boolean], if TRUE message is displayed on standard out, if 
-#' FALSE, message is suppressed
-#' @param sep delimiter [string] to separate message elements when userinfo 
-#' given as vector
+#' @param userinfo Vector of [string] element(s) and variables
+#' @param verbose [boolean] If TRUE message is displayed on standard out, if 
+#' FALSE, message is suppressed.
+#' @param sep Delimiter [string] to separate message elements when userinfo 
+#' given as vector.
 #' @seealso \code{\link{message}} which this function wraps
 vmessage <- function(userinfo, verbose=TRUE, sep=" ") {
     if (verbose) {
@@ -18,21 +18,37 @@ vmessage <- function(userinfo, verbose=TRUE, sep=" ") {
 
 #' Comma-separated string to numeric vector.
 #'
-#' Split input of comma-separated string into vector of numeric values.
+#' Split input of comma-separated string into vector of numeric, logical or 
+#' character values.
 #'
-#' @param commastring input character vector containing numbers separated by 
-#' commas
-#' @return numeric vector of values extracted from commastring
-commaList2vector <- function(commastring) {
-    as.numeric(unlist(strsplit(commastring, ",")))
+#' @param commastring Input [character] vector containing numbers separated by 
+#' commas.
+#' @param type Name [string] of the type of input variables; one of numeric, 
+#' logical or character
+#' @return Numeric vector of values extracted from commastring.
+commaList2vector <- function(commastring=NULL, type="numeric") {
+    if (is.null(commastring)) {
+        return(NULL)
+    }
+    commastring <- gsub(" ", "", commastring)
+    if (type == "numeric") {
+        tmp <- as.numeric(unlist(strsplit(commastring, ",")))
+    } else if (type == "logical") {
+        tmp <- as.logical(unlist(strsplit(commastring, ",")))
+    } else if (type == "character") {
+        tmp <- unlist(strsplit(commastring, ","))
+    } else {
+        stop("Unknown type of comma-separated list elements")
+    }
+    return(tmp)
 }
 
 #' Add all non-NULL elements of list.
 #'
-#' @param compList list of numeric matrices or data.frames of the equal 
-#' dimensions
-#' @return matrix or data.frame containing sum of all list elements where 
-#' \code{is.null} is FALSE
+#' @param compList List of numeric matrices or data.frames of the equal 
+#' dimensions.
+#' @return Matrix or data.frame containing sum of all list elements where 
+#' \code{is.null} is FALSE.
 addNonNulls <- function(compList) {
             nonNulls <- compList[!sapply(compList, is.null)]
             if (length(nonNulls) == 0) return(NULL)
@@ -50,26 +66,26 @@ addNonNulls <- function(compList) {
 #' Wrapper function to simulate data from different distribution with different 
 #' parameter settings.
 #'
-#' @param x the number [integer] of observations to simulate
-#' @param dist name of distribution [string] from which the observations are 
+#' @param x The number [integer] of observations to simulate.
+#' @param dist Name of distribution [string] from which the observations are 
 #' drawn. 'norm' is the normal distribution, 'unif' the uniform distribution 
 #' 'bin' the binomial distribution, "cat_norm" samples categorical variables 
 #' according to a normal distribution and "cat_unif" 
 #' according to a uniform distribution. For "cat_norm", length(category)/2 is 
 #' used mean for the normal distribution unless
 #' specified otherwise.
-#' @param m the mean of the normal distribution [double]/the mean between min 
+#' @param m Mean of the normal distribution [double]/the mean between min 
 #' and max for the uniform distribution [double]/ 
-#' the rank of the category to be used as mean for "cat_norm" [integer]
-#' @param std the standard deviation of the normal distribution or the distance 
-#' of min/max from the mean for the uniform distribution [double]
-#' @param categories number of categories [integer] for simulating categorical 
-#' variables (for distr="cat_norm" or "cat_unif")
-#' @param prob the probability [double] of success for each trial 
-#' (for distr="bin")
-#' @return numeric vector of length [x] with the sampled values
+#' the rank of the category to be used as mean for "cat_norm" [integer].
+#' @param std Standard deviation of the normal distribution or the distance 
+#' of min/max from the mean for the uniform distribution [double].
+#' @param categories Number of categories [integer] for simulating categorical 
+#' variables (for distr="cat_norm" or "cat_unif").
+#' @param prob Probability [double] of success for each trial 
+#' (for distr="bin").
+#' @return Numeric vector of length [x] with the sampled values
 #' @seealso \code{\link{runif}}, \code{\link{rnorm}}, \code{\link{rbinom}} for 
-#' documentation of the underlying distributions
+#' documentation of the underlying distributions.
 #' @export
 #' @examples
 #' normal <- simulateDist(x=10, dist="norm", m=2, std=4)
@@ -80,6 +96,10 @@ addNonNulls <- function(compList) {
 simulateDist <- function(x, 
                          dist=c("unif", "norm", "bin", "cat_norm", "cat_unif"), 
                          m=NULL, std=1, categories=NULL, prob=NULL) {
+    if (length(dist) > 1) {
+        stop("Please specify exactly one distribution to sample from,",
+             "currently ", length(dist), " provided.")
+    }
     if (dist == "unif") {
         if (is.null(m)) m <- 0
         d <- runif(n=x, min=m - std, max=m + std)
@@ -111,4 +131,76 @@ simulateDist <- function(x,
         stop("Unknown distribution")
     }
     return(d)
+}
+
+#' Compute expected genotypes from genotype probabilities.
+#'
+#' Convert genotypes encoded as triplets of probablities (p(AA), p(Aa), p(aa))
+#' into their expected genotype frequencies by 0*p(AA) + p(Aa) + 2p(aa).
+#'
+#' @param probGeno Vector [numeric] with genotype probabilites; has to be a
+#' multiple of 3.
+#' @return Numeric vector of length [length(probGeno)/3] with the expected 
+#' genotype value per individual.
+#' @export
+#' @examples
+#' nrSamples <- 10
+#' # Construct genotype probability vector (usually from external input)
+#' # First, assign zero probabilty of AA, Aa and aa for all samples
+#' genotype_prob <- rep(0, 3*nrSamples)
+#' # Second, for each sample draw one of 0,1,2 (corresponding to AA, Aa and aa)
+#' genotype_prob[seq(1, nrSamples*3, 3) + sample(0:2, 10, replace=TRUE)] <- 1
+#' genotype_exp <- probGen2expGen(genotype_prob)
+probGen2expGen <- function(probGeno) {
+    if (is.list(probGeno) || !is.vector(probGeno, mode="numeric")) {
+        stop("probGen2expGen takes a vector of genotype probabilities as input,
+             but ",  typeof(probGeno), " provided.")
+    }
+    if( length(probGeno) %% 3 != 0) {
+        stop("Length of genotype probabilty vector (",  length(probGeno), 
+             ") is not a multiple of three")
+    }
+    if( any(is.na(probGeno))) {
+        stop("Samples need to be fully genotyped, but missing genotype data
+             detected. Consider imputing missing data, or excluding missing 
+             genotypes")
+    }
+    multiples <- seq(1, length(probGeno), 3)
+    testProb <- zoo::rollapply(unlist(probGeno), 3, by = 3, sum, 
+                              partial = FALSE)
+    if (any(testProb != 1)) {
+        stop("Genotype probabilities do not sum to 1")
+    }
+    probGeno[multiples] <- 0
+    probGeno[(multiples + 2)] <- 2 *  probGeno[(multiples + 2)]
+    expGeno <- zoo::rollapply(unlist(probGeno), 3, by = 3, sum, 
+                              partial = FALSE)
+    return(expGeno )
+}
+
+#' Rewrite expected genotypes into genotype probabilities.
+#'
+#' Convert genotype frequencies to genotypes encoded as triplets of probablities 
+#' (p(AA), p(Aa), p(aa)).
+#'
+#' @param geno Vector [numeric] with genotypes 
+#' @return Numeric vector of length [length(geno)*3] with the genotype encoded 
+#' as probabbilities (p(AA), p(Aa), p(aa)).
+#' @export
+#' @examples
+#' nrSamples <- 10
+#' # Simulate binomial SNP with 0.2 allele frequency
+#' geno <- rbinom(nrSamples, 2, p=0.2)
+#' geno_prob<- expGen2probGen(geno)
+expGen2probGen <- function(geno) {
+    unlist(lapply(geno, function(g) {
+        if (is.na(g)) return( c(NA,NA,NA))
+        else if (g == 0) return( c(1,0,0))
+        else if (g == 1) return( c(0,1,0))
+        else if (g == 2) return( c(0,0,1))
+        else {
+            stop("Genotypes can only be encoded as 0,1,2 or denoted as missing", 
+                "via NA")
+        }
+    }))
 }

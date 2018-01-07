@@ -4,50 +4,67 @@
 \alias{getCausalSNPs}
 \title{Draw random SNPs from genotypes.}
 \usage{
-getCausalSNPs(NrCausalSNPs = 20, genotypes = NULL, chr = NULL,
-  chr_string = NULL, NrChrCausal = NULL, genoFilePrefix = NULL,
-  genoFileSuffix = NULL, genoFileDelimiter = ",", sampleID = "ID_",
-  standardise = FALSE, verbose = TRUE)
+getCausalSNPs(N, NrCausalSNPs = 20, genotypes = NULL, chr = NULL,
+  NrSNPsOnChromosome = NULL, NrChrCausal = NULL, genoFilePrefix = NULL,
+  genoFileSuffix = NULL, oxgen = FALSE, delimiter = ",",
+  skipFields = NULL, probabilities = FALSE, sampleID = "ID_",
+  verbose = TRUE)
 }
 \arguments{
-\item{NrCausalSNPs}{number [integer] of SNPs to chose at random}
+\item{N}{Number [integer] of samples to simulate.}
 
-\item{genotypes}{[NrSamples x totalNrSNPs] matrix of genotypes}
+\item{NrCausalSNPs}{Number [integer] of SNPs to chose at random.}
 
-\item{chr}{numeric vector of chromosomes to chose NrCausalSNPs from; only 
-used when external genotype data is provided i.e. is.null(genoFilePrefix) 
-== FALSE}
+\item{genotypes}{[NrSamples x totalNrSNPs] Matrix of genotypes [integer]/
+[double].}
 
-\item{chr_string}{[string] alternative to chr, a string with chromosomes 
-separated by comma; most often used when run as a command line application}
+\item{chr}{Vector of chromosome(s) [integer] to chose NrCausalSNPs from; only 
+used when external genotype data is provided i.e. !is.null(genoFilePrefix).}
 
-\item{NrChrCausal}{Number [integer] of causal chromosomes to  chose 
+\item{NrSNPsOnChromosome}{Vector of number(s) of SNPs [integer] per entry in 
+chr (see above); has to be the same length as chr. If not provided, lines in 
+file will be counted (which can be slow for large files).}
+
+\item{NrChrCausal}{Number [integer] of causal chromosomes to sample 
 NrCausalSNPs from (as opposed to the actual chromosomes to chose from via chr
-'chr_string);  only used when external genotype data is provided i.e. 
-is.null(genoFilePrefix) == FALSE.}
+); only used when external genotype data is provided i.e.
+!is.null(genoFilePrefix).}
 
 \item{genoFilePrefix}{full path/to/chromosome-wise-genotype-file-ending-
-before-"chrChromosomeNumber" (no '~' expansion!) [string]}
+before-"chrChromosomeNumber" (no '~' expansion!) [string].}
 
-\item{genoFileSuffix}{[string] following chromosome number including 
-.fileformat (e.g. ".csv"); has to be a text format i.e. comma/tab/space
-separated}
+\item{genoFileSuffix}{[string] Following chromosome number including 
+.fileformat (e.g. ".csv"); File described by genoFilePrefix-genoFileSuffix
+has to be a text format i.e. comma/tab/space separated.}
 
-\item{genoFileDelimiter}{field separator [string] of genotype file}
+\item{oxgen}{[boolean] Is genoFilePrefix-genoFileSuffix file in oxgen format?
+See \link{readStandardGenotypes} for details.}
 
-\item{sampleID}{prefix [string] for naming samples (followed by sample number
-from 1 to NrSamples)}
+\item{delimiter}{Field separator [string] of genotypefile or 
+genoFilePrefix-genoFileSuffix file.}
 
-\item{standardise}{[boolean]; if TRUE standardised genotypes will be returned}
+\item{skipFields}{Number [integer] of fields (columns) to skip in 
+genoFilePrefix-genoFileSuffix file. See details.}
 
-\item{verbose}{[boolean]; if TRUE, progress info is printed to standard out}
+\item{probabilities}{[boolean]. If set to TRUE, the genotypes in the files 
+described by genoFilePrefix-genoFileSuffix are provided as triplets of 
+probabilities (p(AA), p(Aa), p(aa)) and are converted into their expected 
+genotype frequencies by 0*p(AA) + p(Aa) + 2p(aa) via \link{probGen2expGen}.}
+
+\item{sampleID}{Prefix [string] for naming samples (will be followed by 
+sample number from 1 to N when constructing id_samples)}
+
+\item{verbose}{[boolean] If TRUE, progress info is printed to standard out}
 }
 \value{
-[N x NrCausalSNPs] matrix of randomly drawn, standardised (depending 
-on standardise option) SNPs
+[N x NrCausalSNPs] Matrix of randomly drawn genotypes [integer]/
+[double]
 }
 \description{
-Draw random SNPs from either simulated genotypes or external genotype files.
+Draw random SNPs from genotypes provided or external genotype files.
+When drawing from external genotype files, only lines of randomly
+chosen SNPs are read, which is recommended for large genotype files. See 
+details for more information.
 }
 \details{
 In order to chose SNPs from external genotype files without reading 
@@ -58,26 +75,29 @@ All genotype files need to be saved in the same directory. genoFilePrefix
 (/path/to/dir/related_nopopstructure_) and genoFileSuffix (.csv) specify the 
 strings leading and following the "chrChromosomenumber". The first column in 
 each file needs to be the SNP_ID and files cannot contain a header. 
-getCausalSNPs generates a vector of chromosomes from which to sample the SNPs
-. For each of the chromosomes, it counts the number of SNPs in the chromosome
- file and creates vectors of random numbers ranging from 1:NrSNPSinFile. Only 
- the lines corresponding to these numbers are then read into R. The example 
- data provided for chromosome 22 contains genotypes (50 samples) of the first 
- 500 SNPs on chromosome 22 with a minor allele frequency of greater than 2% 
- from the European populations of the the 1000 Genomes project.
+Subsequent columns containing additional SNP information can be skipped by 
+setting skipFields. getCausalSNPs generates a vector of chromosomes from 
+which to sample the SNPs. For each of the chromosomes, it counts the number 
+of SNPs in the chromosome file and creates vectors of random numbers ranging 
+from 1:NrSNPSinFile. Only the lines corresponding to these numbers are then
+read into R. The example data provided for chromosome 22 contains genotypes 
+(50 samples) of the first 500 SNPs on chromosome 22 with a minor allele 
+frequency of greater than 2% from the European populations of the the 1000 
+Genomes project.
 }
 \examples{
+# get causal SNPs from genotypes simulated within PhenotypeSimulator
 geno <- simulateGenotypes(N=10, NrSNP=10)
-causalSNPsFromSimulatedGenoStandardised <- getCausalSNPs(NrCausalSNPs=10,
-genotypes=geno, 
-standardise=TRUE)
+causalSNPsFromSimulatedGenoStandardised <- getCausalSNPs(N=10,
+NrCausalSNPs=10, genotypes=geno$genotypes)
 
+# Get causal SNPs by sampling lines from large SNP files
 genotypeFile <- system.file("extdata/genotypes/",
 "genotypes_chr22.csv",
 package = "PhenotypeSimulator")
 genoFilePrefix <- gsub("chr.*", "", genotypeFile) 
 genoFileSuffix <- ".csv" 
-causalSNPsFromFile <- getCausalSNPs(NrCausalSNPs=10, chr=22, 
+causalSNPsFromLines <- getCausalSNPs(N=50, NrCausalSNPs=10, chr=22, 
 genoFilePrefix=genoFilePrefix, 
 genoFileSuffix=genoFileSuffix)
 }
