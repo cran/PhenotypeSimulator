@@ -5,15 +5,21 @@ In quantitative genetics, genotype to phenotype mapping is commonly realised by 
 
 *PhenotypeSimulator* allows for the simulation of complex phenotypes under different models, including genetic variant effects and infinitesimal genetic effects (reflecting population structure) as well as correlated, non-genetic covariates and observational noise effects. Different phenotypic effects can be combined into a final phenotype while controlling for the proportion of variance explained by each of the components. For each component, the number of variables, their distribution and the design of their effect across traits can be customised. 
 
-The current CRAN version of *PhenotypeSimulator* is: 0.1.3
-
-An update of version 0.1.3 has been submitted to CRAN (awaiting approval) and can already be downloaded from this github repository via
-```{r}
-install.packages("devtools")
-devtools::install_github("HannahVMeyer/PhenotypeSimulator")
+The current github version of *PhenotypeSimulator* is: 0.2.1 and can be
+installed via
+```bash
+library(devtools)
+install_github("HannahVMeyer/PhenotypeSimulator")
 ```
+The current CRAN version of *PhenotypeSimulator* is: 0.2.0
 
-## Major changes from version 0.1.3 to the current github version 0.2.0:
+## Minor changes from version 0.2.0 to version 0.2.1:
+1. Additional tests for compatibility of input parameters with variance
+   components functions, genotype functions and output functions.
+1. Bug fix in output function: savePheno now properly saves kinship matrix as
+   .rds.
+
+## Major changes from version 0.1.3 to version 0.2.0:
 
 **Input**
 1. *PhenotypeSimulator* now includes readStandardGenotypes which can read externally simulated or user-provided genotypes in plink, genome, oxgen (hapgen/impute2), bimbam or simple delimited format.

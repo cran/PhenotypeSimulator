@@ -15,7 +15,16 @@
 #' x <- matrix(rnorm(100), nc=10)
 #' x_scaled <- rescaleVariance(x, propvar=0.4)
 rescaleVariance <- function(component, propvar) {
-    if (propvar != 0) {
+    if (!is.numeric(propvar)) {
+        stop("propvar needs to be numeric")
+    }
+    if (propvar < 0 || propvar > 1) {
+        stop("propvar cannot be less than 0 and or greater than 1")
+    }
+    if (!is.null(component) && !is.matrix(component)){
+        stop("component needs to be a matrix")
+    }
+    if (!is.null(component) && propvar != 0) {
         var_component <- var(component)
         mean_var <- mean(diag(var_component))
         scale_factor <- sqrt(propvar/mean_var)
@@ -28,7 +37,6 @@ rescaleVariance <- function(component, propvar) {
         return(NULL)
     }
 }
-
 
 #' Set simulation model.
 #'
@@ -88,27 +96,28 @@ setModel <- function(genVar=NULL, h2s=NULL, theta=0.8, h2bg=NULL, eta=0.8,
     if (is.null(c(genVar, noiseVar, h2bg, h2s, delta, rho, phi))) {
         stop("No variance components specified")
     }
-    all_proportions <- c(genVar=genVar, h2s=h2s, h2bg=h2bg, theta=theta,
-                         eta=eta, noiseVar=noiseVar, delta=delta, gamma=gamma, 
-                         rho=rho, phi=phi, alpha=alpha, pcorr=pcorr, 
-                         pIndependentConfounders=pIndependentConfounders, 
-                         pTraitIndependentConfounders=
-                             pTraitIndependentConfounders, 
-                         pIndependentGenetic=pIndependentGenetic, 
-                         pTraitIndependentGenetic=pTraitIndependentGenetic)
-    if (any(all_proportions < 0) || any(all_proportions > 1)) {
-        outOfRange <- union(which(all_proportions < 0), 
-                            which(all_proportions > 1))
-        stop("Proportions have to be specified between 0 and 1: ", 
-             paste(names(all_proportions)[outOfRange], collapse=","), 
-             " are outside of this range (",  
-             paste(all_proportions[outOfRange], collapse=","), ")", sep="")
-    }
+    numbers <- list(genVar=genVar, h2s=h2s, h2bg=h2bg, theta=theta,
+                    eta=eta, noiseVar=noiseVar, delta=delta, gamma=gamma, 
+                    rho=rho, phi=phi, alpha=alpha, pcorr=pcorr, 
+                    pIndependentConfounders=pIndependentConfounders, 
+                    pTraitIndependentConfounders=
+                        pTraitIndependentConfounders, 
+                    pIndependentGenetic=pIndependentGenetic, 
+                    pTraitIndependentGenetic=pTraitIndependentGenetic)
+    proportions <- list(genVar=genVar, h2s=h2s, h2bg=h2bg, theta=theta,
+                        eta=eta, noiseVar=noiseVar, delta=delta, gamma=gamma, 
+                        rho=rho, phi=phi, alpha=alpha, pcorr=pcorr, 
+                        pIndependentConfounders=pIndependentConfounders, 
+                        pTraitIndependentConfounders=
+                            pTraitIndependentConfounders, 
+                        pIndependentGenetic=pIndependentGenetic, 
+                        pTraitIndependentGenetic=pTraitIndependentGenetic)
+    testNumerics(numbers=numbers, proportions=proportions)
     if (is.null(genVar)) {
         if (is.null(noiseVar)) {
             stop(paste("Neither genVar nor noiseVar are provided, thus",
-                      "proportion of variance from genetics cannot be deduced")
-                 )
+                       "proportion of variance from genetics cannot be deduced")
+            )
         } else {
             genVar <- 1 - noiseVar
         } 
@@ -121,7 +130,7 @@ setModel <- function(genVar=NULL, h2s=NULL, theta=0.8, h2bg=NULL, eta=0.8,
     }
     if (noiseVar == 0 && any(!is.null(phi), !is.null(rho), !is.null(delta))) {
         stop(paste("The noise variance is set to 0 (or genetic variance set to",
-                    " 1) but noise variance components are supplied")
+                   " 1) but noise variance components are supplied")
         )
     }
     if (genVar == 0 && any(!is.null(h2s), !is.null(h2bg))) {
@@ -133,6 +142,9 @@ setModel <- function(genVar=NULL, h2s=NULL, theta=0.8, h2bg=NULL, eta=0.8,
              verbose=verbose)
     if ((noiseVar) == 0 ) {
         modelNoise="noNoise"
+        delta <- 0 
+        rho <- 0
+        phi <- 0
         vmessage(c("The noise model is:", modelNoise), verbose=verbose)
     } else {
         if (all(c(is.null(delta), is.null(rho), is.null(phi)))) {
@@ -210,20 +222,20 @@ setModel <- function(genVar=NULL, h2s=NULL, theta=0.8, h2bg=NULL, eta=0.8,
             vmessage(c("Proportion of non-genetic covariate variance (delta):", 
                        delta), verbose=verbose)
             vmessage(c("Proportion of variance of shared non-genetic covariate",
-                           "effects (gamma):", gamma), verbose=verbose)
+                       "effects (gamma):", gamma), verbose=verbose)
             vmessage(c("Proportion of non-genetic covariates to have",
-                           "a trait-independent effect (pIndependentConfounders"
-                            , "):", pIndependentConfounders), 
+                       "a trait-independent effect (pIndependentConfounders"
+                       , "):", pIndependentConfounders), 
                      verbose=verbose)
             vmessage(c("Proportion of traits influenced by independent",
-                        "non-genetic covariate effects", 
-                        "(pTraitIndependentConfounders):", 
+                       "non-genetic covariate effects", 
+                       "(pTraitIndependentConfounders):", 
                        pTraitIndependentConfounders), verbose=verbose)
         } else if (rho == 1) {
             modelNoise="noiseCorrelatedOnly"
             vmessage(c("The noise model is:", modelNoise), verbose=verbose)
             vmessage(c("Proportion of variance of correlated noise effects",
-                           "(rho):", rho), verbose=verbose)
+                       "(rho):", rho), verbose=verbose)
         } else if (rho == 0) {
             modelNoise="noiseFixedAndBg"
             vmessage(c("The noise model is:", modelNoise), verbose=verbose)
@@ -259,7 +271,7 @@ setModel <- function(genVar=NULL, h2s=NULL, theta=0.8, h2bg=NULL, eta=0.8,
                        "(pTraitIndependentConfounders):", 
                        pTraitIndependentConfounders), verbose=verbose)
             vmessage(c("Proportion of variance of correlated noise effects",
-                           "(rho):", rho), verbose=verbose)
+                       "(rho):", rho), verbose=verbose)
             vmessage(c("Correlation between phenotypes (pcorr):", pcorr), 
                      verbose=verbose)
         } else if (delta == 0 ) {
@@ -287,7 +299,7 @@ setModel <- function(genVar=NULL, h2s=NULL, theta=0.8, h2bg=NULL, eta=0.8,
                        "(pTraitIndependentConfounders):", 
                        pTraitIndependentConfounders), verbose=verbose)
             vmessage(c("Proportion of variance of correlated noise effects",
-                           "(rho):", rho), verbose=verbose)
+                       "(rho):", rho), verbose=verbose)
             vmessage(c("Proportion of observational noise variance (phi):", 
                        phi), verbose=verbose)
             vmessage(c("Variance of shared observational noise effect (alpha):", 
@@ -295,11 +307,13 @@ setModel <- function(genVar=NULL, h2s=NULL, theta=0.8, h2bg=NULL, eta=0.8,
         }
         vmessage("\n", verbose=verbose)
     }
-
+    
     vmessage(c("The total genetic variance (genVar) is:", genVar), 
              verbose=verbose)
     if ( genVar == 0 ) {
         modelGenetic="noGenetic"
+        h2s <- 0
+        h2bg <- 0
         vmessage(c("The genetic model is:", modelGenetic), verbose=verbose)
     } else {   
         if (all(c(is.null(h2bg), is.null(h2s)))) {
@@ -335,21 +349,21 @@ setModel <- function(genVar=NULL, h2s=NULL, theta=0.8, h2bg=NULL, eta=0.8,
             vmessage(c("Proportion of variance of infinitesimal genetic", 
                        "effects (h2bg):", h2bg), verbose=verbose)
             vmessage(c("Proportion of variance of shared infinitesimal genetic",
-                           "effects (eta):", eta), verbose=verbose)
+                       "effects (eta):", eta), verbose=verbose)
         } else if ( h2s == 1) {
             modelGenetic="geneticFixedOnly"
             vmessage(c("The genetic model is:", modelGenetic), verbose=verbose)
             vmessage(c("Proportion of variance of genetic variant effects",
-                           "(h2s):", h2s), verbose=verbose)
+                       "(h2s):", h2s), verbose=verbose)
             vmessage(c("Proportion of variance of shared genetic variant",
-                           "effects (theta):", theta), verbose=verbose)
+                       "effects (theta):", theta), verbose=verbose)
             vmessage(c("Proportion of genetic variant effects to have a", 
-                           "trait-independent fixed effect", 
-                           "(pIndependentGenetic):", pIndependentGenetic), 
+                       "trait-independent fixed effect", 
+                       "(pIndependentGenetic):", pIndependentGenetic), 
                      verbose=verbose)
             vmessage(c("Proportion of traits influenced by independent",
                        "genetic variant effects (pTraitIndependentGenetic):",
-                           pTraitIndependentGenetic), 
+                       pTraitIndependentGenetic), 
                      verbose=verbose)
         } else {
             modelGenetic="geneticFixedAndBg"
@@ -381,7 +395,7 @@ setModel <- function(genVar=NULL, h2s=NULL, theta=0.8, h2bg=NULL, eta=0.8,
                 pIndependentGenetic=pIndependentGenetic,
                 pTraitIndependentConfounders=pTraitIndependentConfounders,
                 pIndependentConfounders=pIndependentConfounders
-                ))
+    ))
 }
 
 
@@ -569,10 +583,9 @@ runSimulation <- function(N, P,
                           meanNoiseBg=0, sdNoiseBg=1, 
                           sampleID="ID_", phenoID="Trait_", snpID="SNP_",
                           seed=219453, verbose=FALSE) {
-
+    
     vmessage(c("Set seed:", seed), verbose=verbose)
     set.seed(seed)
-       # find model
     model <- setModel(genVar=genVar, h2s=h2s, h2bg=h2bg, theta=theta, eta=eta, 
                       noiseVar=noiseVar, rho=rho, delta=delta, gamma=gamma, 
                       phi=phi, alpha=alpha, pcorr=pcorr, 
@@ -584,7 +597,7 @@ runSimulation <- function(N, P,
     id_snps <- NULL
     id_samples <- NULL
     id_phenos <- paste(phenoID, 1:P, sep="")
-
+    
     ### create simulated phenotypes
     # 1. Simulate genetic terms
     vmessage(c("Simulate genetic effects (genetic model: ", 
@@ -593,11 +606,11 @@ runSimulation <- function(N, P,
         if (is.null(genoFilePrefix) && is.null(genotypefile)) {
             if (!grepl('Bg', model$modelGenetic) && tNrSNP != cNrSNP) {
                 warning(paste("The genetic model does not contain infinitesimal",
-                            "genetic effects but the total number of SNPs to",
-                            "simulate (tNrSNP:",
-                            tNrSNP, ") is larger than the number of genetic 
+                              "genetic effects but the total number of SNPs to",
+                              "simulate (tNrSNP:",
+                              tNrSNP, ") is larger than the number of genetic 
                             variant effects SNPs (cNrSNP:", cNrSNP, 
-                            "). If genotypes are not needed, consider setting 
+                              "). If genotypes are not needed, consider setting 
                             tNrSNPs=cNrSNPs to speed up computation"))
             }
             genotypes <- simulateGenotypes(N=N, NrSNP=tNrSNP, 
@@ -652,7 +665,8 @@ runSimulation <- function(N, P,
                                         sdBeta=sdBetaGenetic,
                                         id_phenos=id_phenos,
                                         id_samples=id_samples,
-                                        phenoID=phenoID)
+                                        phenoID=phenoID,
+                                        verbose=verbose)
         
         var_genFixed_shared <- model$theta * model$h2s * model$genVar
         var_genFixed_independent <- (1 - model$theta) * model$h2s * model$genVar
@@ -660,7 +674,7 @@ runSimulation <- function(N, P,
         genFixed_shared_rescaled <- rescaleVariance(genFixed$shared, 
                                                     var_genFixed_shared)
         genFixed_independent_rescaled <- rescaleVariance(genFixed$independent, 
-                                                var_genFixed_independent)
+                                                         var_genFixed_independent)
         
         Y_genFixed <- addNonNulls(list(genFixed_shared_rescaled$component, 
                                        genFixed_independent_rescaled$component))
@@ -701,11 +715,11 @@ runSimulation <- function(N, P,
             kinship <- getKinship(kinshipfile=kinshipfile, 
                                   sep=kinshipDelimiter, 
                                   N=N, header=kinshipHeader, verbose=verbose,
-                                 sampleID=sampleID, id_samples=id_samples)
+                                  sampleID=sampleID, id_samples=id_samples)
             if(!is.null(genotypes)) {
                 if(colnames(kinship) != genotypes$id_samples) {
                     stop(paste("Sample names in kinship file do not match", 
-                                "sample names of genotypes", sep=""))
+                               "sample names of genotypes", sep=""))
                 }
             } else {
                 id_samples <- colnames(kinship)
@@ -739,14 +753,14 @@ runSimulation <- function(N, P,
         
         Y_genBg <- addNonNulls(list(genBg_shared_rescaled$component, 
                                     genBg_independent_rescaled$component))
-       
+        
         cov_genBg_shared <- genBg$cov_shared
         cov_genBg_shared_rescaled <- cov_genBg_shared * 
-                                        genBg_shared_rescaled$scale_factor^2
-         
+            genBg_shared_rescaled$scale_factor^2
+        
         cov_genBg_independent <- genBg$cov_independent
         cov_genBg_independent_rescaled <- cov_genBg_independent * 
-                                    genBg_independent_rescaled$scale_factor^2
+            genBg_independent_rescaled$scale_factor^2
         
         cov_genBg <- cov_genBg_shared_rescaled + cov_genBg_independent_rescaled
     } else {
@@ -787,7 +801,7 @@ runSimulation <- function(N, P,
         Y_correlatedBg <- correlatedBg_rescaled$component
         
         cov_correlatedBg <- correlatedBg$cov_correlated * 
-                            correlatedBg_rescaled$scale_factor^2
+            correlatedBg_rescaled$scale_factor^2
     } else {
         correlatedBg <- NULL
         var_noiseCorrelated <- 0
@@ -826,14 +840,14 @@ runSimulation <- function(N, P,
         
         cov_noiseBg_shared <- noiseBg$cov_shared
         cov_noiseBg_shared_rescaled <- cov_noiseBg_shared * 
-                                    noiseBg_shared_rescaled$scale_factor^2
+            noiseBg_shared_rescaled$scale_factor^2
         
         cov_noiseBg_independent <- noiseBg$cov_independent
         cov_noiseBg_independent_rescaled <- cov_noiseBg_independent * 
-                                    noiseBg_independent_rescaled$scale_factor^2
+            noiseBg_independent_rescaled$scale_factor^2
         
         cov_noiseBg <- cov_noiseBg_shared_rescaled + 
-                        cov_noiseBg_independent_rescaled
+            cov_noiseBg_independent_rescaled
         
     } else {
         noiseBg <- NULL
@@ -870,7 +884,8 @@ runSimulation <- function(N, P,
                                         id_phenos=id_phenos,
                                         id_samples=id_samples,
                                         sampleID=sampleID,
-                                        phenoID=phenoID)
+                                        phenoID=phenoID,
+                                        verbose=verbose)
         
         
         var_noiseFixed_shared <- model$gamma * model$delta * model$noiseVar
@@ -884,7 +899,7 @@ runSimulation <- function(N, P,
             var_noiseFixed_independent)
         
         Y_noiseFixed <- addNonNulls(list(noiseFixed_shared_rescaled$component, 
-                                    noiseFixed_independent_rescaled$component))
+                                         noiseFixed_independent_rescaled$component))
     } else {
         noiseFixed <- NULL
         noiseFixed_shared_rescaled <- NULL
@@ -893,7 +908,7 @@ runSimulation <- function(N, P,
         var_noiseFixed_independent <- 0
         Y_noiseFixed <- NULL
     }
-
+    
     
     # 3. Construct final simulated phenotype 
     vmessage("Construct final simulated phenotype"
@@ -903,7 +918,7 @@ runSimulation <- function(N, P,
                        Y_correlatedBg)
     Y <-  addNonNulls(components)
     Y <- scale(Y)
-  
+    
     varComponents <- data.frame(genVar=model$genVar, h2s=model$h2s, 
                                 h2bg=model$h2bg, 
                                 var_genFixed_shared=var_genFixed_shared, 
@@ -919,41 +934,41 @@ runSimulation <- function(N, P,
                                 var_noiseBg_independent=var_noiseBg_independent, 
                                 var_noiseCorrelated=var_noiseCorrelated)
     phenoComponentsFinal <- list(Y=Y, Y_genFixed=Y_genFixed, Y_genBg=Y_genBg, 
-                            Y_noiseFixed=Y_noiseFixed, Y_noiseBg=Y_noiseBg, 
-                            Y_correlatedBg=Y_correlatedBg, 
-                            cov_genBg=cov_genBg, 
-                            cov_noiseBg=cov_noiseBg,
-                            cov_correlatedBg = cov_correlatedBg)
+                                 Y_noiseFixed=Y_noiseFixed, Y_noiseBg=Y_noiseBg, 
+                                 Y_correlatedBg=Y_correlatedBg, 
+                                 cov_genBg=cov_genBg, 
+                                 cov_noiseBg=cov_noiseBg,
+                                 cov_correlatedBg = cov_correlatedBg)
     phenoComponentsIntermediate <- list(
-                                 Y_genFixed_shared=
-                                     genFixed_shared_rescaled$component,
-                                 Y_genFixed_independent=
-                                     genFixed_independent_rescaled$component,
-                                 Y_noiseFixed_shared=
-                                     noiseFixed_shared_rescaled$component,
-                                 Y_noiseFixed_independent=
-                                     noiseFixed_independent_rescaled$component,
-                                 Y_genBg_shared=
-                                     genBg_shared_rescaled$component,
-                                 Y_genBg_independent=
-                                     genBg_independent_rescaled$component,
-                                 Y_noiseBg_shared=
-                                     noiseBg_shared_rescaled$component,
-                                 Y_noiseBg_independent=
-                                     noiseBg_independent_rescaled$component,
-                                 cov_genBg_shared=cov_genBg_shared, 
-                                 cov_genBg_independent=cov_genBg_independent, 
-                                 cov_noiseBg_shared=cov_noiseBg_shared,
-                                 cov_noiseBg_independent=cov_noiseBg_independent, 
-                                 genFixed=genFixed, 
-                                 noiseFixed=noiseFixed)
+        Y_genFixed_shared=
+            genFixed_shared_rescaled$component,
+        Y_genFixed_independent=
+            genFixed_independent_rescaled$component,
+        Y_noiseFixed_shared=
+            noiseFixed_shared_rescaled$component,
+        Y_noiseFixed_independent=
+            noiseFixed_independent_rescaled$component,
+        Y_genBg_shared=
+            genBg_shared_rescaled$component,
+        Y_genBg_independent=
+            genBg_independent_rescaled$component,
+        Y_noiseBg_shared=
+            noiseBg_shared_rescaled$component,
+        Y_noiseBg_independent=
+            noiseBg_independent_rescaled$component,
+        cov_genBg_shared=cov_genBg_shared, 
+        cov_genBg_independent=cov_genBg_independent, 
+        cov_noiseBg_shared=cov_noiseBg_shared,
+        cov_noiseBg_independent=cov_noiseBg_independent, 
+        genFixed=genFixed, 
+        noiseFixed=noiseFixed)
     
     setup <- list(P=P, N=N, NrCausalSNPs=cNrSNP, 
                   modelGenetic=model$modelGenetic, 
                   modelNoise=model$modelNoise, 
                   id_samples=id_samples, id_phenos=id_phenos, id_snps=id_snps)
     rawComponents <- list(kinship=kinship, genotypes=genotypes)
-
+    
     return(list(varComponents=varComponents, 
                 phenoComponentsFinal=phenoComponentsFinal, 
                 phenoComponentsIntermediate=phenoComponentsIntermediate, 

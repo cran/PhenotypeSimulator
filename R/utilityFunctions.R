@@ -11,6 +11,9 @@
 #' given as vector.
 #' @seealso \code{\link{message}} which this function wraps
 vmessage <- function(userinfo, verbose=TRUE, sep=" ") {
+    if (!is.character(sep)) {
+        stop("Separator passed to vmessage must be of type character")
+    }
     if (verbose) {
         message(paste(userinfo, collapse=sep))
     }
@@ -50,6 +53,9 @@ commaList2vector <- function(commastring=NULL, type="numeric") {
 #' @return Matrix or data.frame containing sum of all list elements where 
 #' \code{is.null} is FALSE.
 addNonNulls <- function(compList) {
+            if (!is.list(compList)) {
+                stop("addNonNulls expects input of type list")
+            }
             nonNulls <- compList[!sapply(compList, is.null)]
             if (length(nonNulls) == 0) return(NULL)
             if (length(unique(sapply(nonNulls, ncol))) != 1) {
@@ -96,19 +102,49 @@ addNonNulls <- function(compList) {
 simulateDist <- function(x, 
                          dist=c("unif", "norm", "bin", "cat_norm", "cat_unif"), 
                          m=NULL, std=1, categories=NULL, prob=NULL) {
+    if (x < 0) {
+        stop(paste("The number of observations to simulate (", x, ") has ",
+                   "to be greater than 0"))
+    }
     if (length(dist) > 1) {
         stop("Please specify exactly one distribution to sample from,",
              "currently ", length(dist), " provided.")
     }
     if (dist == "unif") {
+        if (!is.null(m) && !is.numeric(m)) {
+            stop("mean between min and max for the uniform distribution is ", 
+                 "not numeric")
+        }
+        if (!is.numeric(m)) {
+            stop("distance of min/max from the mean for the uniform ", 
+                 "distribution is not numeric")
+        }
         if (is.null(m)) m <- 0
         d <- runif(n=x, min=m - std, max=m + std)
     }
     else if (dist == "norm") {
+        if (!is.null(m) && !is.numeric(m)) {
+            stop("Mean of normal distribution is not numeric")
+        }
+        if (!is.numeric(std)) {
+            stop("Standard deviation of normal distribution is not numeric")
+        }
         if (is.null(m)) m <- 0
+        if (std < 0) {
+            stop(paste("Simulating normal distribution: standard deviation ",
+                       "to be greater than 0"))
+        }
         d <- rnorm(n=x, mean=m, sd=std)
     }
     else if (dist == "bin") {
+        if (is.null(prob)) {
+            stop(paste("Simulating binomial distribution: Probability has to ",
+                       "be specified"))
+        }
+        if (!is.numeric(prob)) {
+            stop(paste("Simulating binomial distribution: Probability has to",
+                       "be numeric"))
+        }
         if (prob < 0) {
             stop(paste("Simulating binomial distribution: Probability has to",
                 "be between 0 and 1"))
@@ -116,14 +152,31 @@ simulateDist <- function(x,
         d <- rbinom(n=x, size=1, prob=prob)
     }
     else if (grepl("cat", dist)) {
+        if (is.null(categories)) {
+            stop(paste("Simulating categorical distribution: number of ",
+                       "categories has to be specified"))
+        }
+        if (!is.numeric(categories)) {
+            stop(paste("Simulating categorical distribution: categories has to",
+                       "be numeric"))
+        }
+        if (categories <= 0) {
+            stop(paste("Simulating categorical distribution: number of ",
+                       "categories has to be greater than 0"))
+        }
         if (dist == "cat_norm") {
             # generate probabilities for categories
+            if (!is.null(m) && !is.numeric(m)) {
+                stop("Median of cat_norm distribution is not numeric")
+            }
             if (is.null(m)) m <- median(1:categories)
             ptmp=sapply(1:categories, pnorm, mean=m, sd=std)
             prob = c(ptmp[1],diff(ptmp))/sum(c(ptmp[1],diff(ptmp)))
         }
         else if (dist == "cat_unif") {
             prob=rep(1/categories, categories)
+        } else {
+            stop("Unknown distribution")
         }
         d = sample(1:categories, x, replace=TRUE, prob=prob)
         d <- as.numeric(d)
@@ -193,6 +246,19 @@ probGen2expGen <- function(probGeno) {
 #' geno <- rbinom(nrSamples, 2, p=0.2)
 #' geno_prob<- expGen2probGen(geno)
 expGen2probGen <- function(geno) {
+    if (is.list(geno)) {
+        stop("expGen2probGen takes a vector of genotypes as input,
+             but list provided.")
+    } 
+    if (length(geno) <= 1) {
+        if (!is.na(geno) && !is.numeric(geno) ) {
+            stop("expGen2probGen takes a vector of genotypes as input,
+             but ",  typeof(geno), " provided.")
+        }
+    } else if (!is.vector(geno, mode="numeric")) {
+        stop("expGen2probGen takes a vector of genotypes as input,
+             but ",  typeof(geno), " provided.")
+    }
     unlist(lapply(geno, function(g) {
         if (is.na(g)) return( c(NA,NA,NA))
         else if (g == 0) return( c(1,0,0))
@@ -203,4 +269,55 @@ expGen2probGen <- function(geno) {
                 "via NA")
         }
     }))
+}
+#' Test lists for different properties of numerics
+#' 
+#' Test all elements of a list if they are numeric, positive numbers, integers
+#' or proportions (range 0-1)
+#' 
+#' @param numbers List whose elements are tested for being numeric
+#' @param positives List whose elements are tested for being positive numbers
+#' @param integers List whose elements are tested for being integers
+#' @param proportions List whose elements are tested for being proportions 
+#' between 0 and 1
+#' @return NULL
+testNumerics <- function(numbers, positives=NULL, integers=NULL, 
+                         proportions=NULL) {
+    notNullnotNumeric <- function(x) !is.null(x) && !is.numeric(x)
+    notNullnotPositive <- function(x) !is.null(x)  && x <= 0
+    notNullnotInteger <- function(x) !is.null(x)  && x%%1!=0 
+    notNullNotInRange <- function(x) !is.null(x)  && (x < 0 || x > 1) 
+    if (any(sapply(numbers, notNullnotNumeric))) {
+        notNumbers <- which(sapply(numbers, notNullnotNumeric))
+        stop(paste(names(numbers)[notNumbers], collapse=","), 
+             " is/are not numeric (",  
+             paste(numbers[notNumbers], collapse=","), ")", sep="")
+    }
+    if (!is.null(positives)) {
+        if (any(sapply(positives, notNullnotPositive))) {
+            notPositives <- which(sapply(positives, notNullnotPositive))
+            stop(paste(names(positives)[notPositives], collapse=","), 
+                 " has/have to be greater than zero (",  
+                 paste(positives[notPositives], collapse=","), ")", 
+                 sep="")
+        }  
+    }
+    if (!is.null(integers)) {
+        if (any(sapply(integers, notNullnotInteger))) {
+            notIntegers <- which(sapply(integers, notNullnotInteger))
+            stop(paste(names(integers)[notIntegers], collapse=","), 
+                 " has/have to be integers, given ",  
+                 paste(integers[notIntegers], collapse=","), 
+                 sep="")
+        }  
+    }
+    if (!is.null(proportions)) {
+        if (any(sapply(proportions, notNullNotInRange))) {
+            outOfRange <- which(sapply(proportions, notNullNotInRange))
+            stop("Proportions have to be specified between 0 and 1: ", 
+                 paste(names(proportions)[outOfRange], collapse=","), 
+                 " are outside of this range (",  
+                 paste(proportions[outOfRange], collapse=","), ")", sep="")
+        }  
+    }
 }

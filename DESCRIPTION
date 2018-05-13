@@ -1,7 +1,7 @@
 Package: PhenotypeSimulator
 Title: Flexible Phenotype Simulation from Different Genetic and Noise
         Models
-Version: 0.2.0
+Version: 0.2.2
 Authors@R: c(
   person("Hannah", "Meyer", email = "hannah@ebi.ac.uk", role = c("aut", "cre")),
   person("Konrad", "Rudolph", email = "konrad.rudolph@gmail.com", role = "ctb")
@@ -27,8 +27,8 @@ Description: Simulation is a critical part of method development and assessment
 Depends: R (>= 3.3.0)
 biocViews:
 LinkingTo: Rcpp
-Imports: methods, optparse, R.utils, mvtnorm, snpStats, zoo,
-        data.table, Rcpp (>= 0.12.11), ggplot2, reshape2, dplyr
+Imports: methods, optparse, R.utils, mvtnorm, snpStats, zoo, data.table
+        (>= 1.11.0), Rcpp (>= 0.12.11), ggplot2, reshape2, dplyr
 Suggests: testthat, knitr, rmarkdown
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -36,9 +36,9 @@ LazyData: true
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2018-01-07 21:21:54 UTC; hannah
+Packaged: 2018-05-13 18:32:45 UTC; hannah
 Author: Hannah Meyer [aut, cre],
   Konrad Rudolph [ctb]
 Maintainer: Hannah Meyer <hannah@ebi.ac.uk>
 Repository: CRAN
-Date/Publication: 2018-01-07 21:42:18 UTC
+Date/Publication: 2018-05-13 18:52:32 UTC
