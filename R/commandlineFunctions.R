@@ -1,4 +1,4 @@
-#' Command line execution for PhenotypeSimulator
+#' Command line execution for PhenotypeSimulator.
 #' 
 #' simulatePhenotypes runs without arguments. Upon call, it reads command-line
 #' parameters and supplies these to \code{\link{runSimulation}} and 
@@ -38,7 +38,7 @@ simulatePhenotypes <- function() {
         make_option(c("--NrPhenotypes"), action="store", dest="NrPhenotypes", 
                     type="integer", help="Number of phenotypes to 
                     simulate [default: %default]."),
-        
+
         make_option(c("--genVar"), action="store", dest="genVar", 
                     default=NULL, type="double", help="Total genetic variance 
                     [default: %default]."),
@@ -77,7 +77,7 @@ simulatePhenotypes <- function() {
         make_option(c("--phi"), action="store", dest="phi", default=NULL
                     , type="double", help="Proportion of observational noise 
                     variance from total noise variance [default: %default]."),
-        
+
         make_option(c("--tNrSNP"), action="store", dest="tNrSNP", 
                     default=5000, type="integer", help="Total number of SNPs to 
                     simulate [default: %default]."),
@@ -89,7 +89,7 @@ simulatePhenotypes <- function() {
                     type="character", help="Comma-separated list of allele 
                     frequencies from which to sample when simulating genotypes 
                     [default: %default]."),
-        
+
         make_option(c("--genotypefile"), action="store", 
                     dest="genotypefile", default=NULL, type="character", 
                     help="Path to external genotype file (to be fully read into 
@@ -97,10 +97,13 @@ simulatePhenotypes <- function() {
                     [default: %default]."),
         make_option(c("--format"), action="store", 
                     dest="format", default=NULL, type="character", 
-                    help="Needed when --genotypefile specified, specifies the 
-                    format of the genotype data; has to be one of plink, oxgen, 
-                    genome, bimbam and delim [default: %default]"),
-        
+                    help="Needed when --genotypefile or
+                    --genoFilePrefix/--genoFileSuffix are specified; specifies  
+                    format of the genotype data; if --genotypefile: has to be 
+                    one of plink, oxgen, genome, bimbam or delim, if 
+                    --genoFilePrefix/--genoFileSuffix has to be 
+                    one of oxgen, bimbam or delim [default: %default]"),
+
         make_option(c("--genoFilePrefix"), action="store", 
                     dest="genoFilePrefix", default=NULL, type="character", 
                     help="Full path to file (no tilde-expansion) and prefix of 
@@ -112,13 +115,9 @@ simulatePhenotypes <- function() {
                     format indication (e.g. '.csv') [default: %default]."),
         make_option(c("--genoFileDelimiter"), action="store", 
                     dest="genoFileDelimiter", default=",", type="character", 
-                    help="Field separator of genotype or 
-                    genoFilePrefix-genoFileSuffix file; if file is 
+                    help="Field separator of --genotypefile or
+                    --genoFilePrefix/--genoFileSuffix; if file is 
                     tab-separated, please specify 'tab' [default: %default]."),
-        make_option(c("--oxgen"), action="store_true", 
-                    dest="oxgen", default=FALSE, type="logical", 
-                    help="Set this flag if genoFilePrefix-genoFileSuffix file is
-                    in oxgen format [default: %default]."),
         make_option(c("--probabilities"), action="store_true", 
                     dest="probabilities", default=FALSE, type="logical", 
                     help="Set this flag if the genotypes in genoFilePrefix-
@@ -130,7 +129,7 @@ simulatePhenotypes <- function() {
                     dest="skipFields", default=NULL, type="integer", 
                     help="Number of fields (columns) to skip in genoFilePrefix-
                     genoFileSuffix file [default: %default]."),
-        
+
         make_option(c("--chr"), action="store", 
                     dest="chr_string", default=NULL, type="character", 
                     help="Comma-separated list of chromosomes to draw causal 
@@ -147,7 +146,7 @@ simulatePhenotypes <- function() {
                     help="Number of chromosomes to randomly draw causal SNPs 
                     from (as opposed to a specific list of chromosomes 
                     to draw from via --chr) [default: %default]."),
-        
+
         make_option(c("--kinshipFile"), action="store", 
                     dest="kinshipfile", default=NULL, type="character", 
                     help="Path to pre-computed, comma-separated kinshipfile 
@@ -182,7 +181,7 @@ simulatePhenotypes <- function() {
                     same subset of traits [default: %default]."),
         make_option(c("--pTraitsAffectedGenetics"), action="store", 
                     dest="pTraitsAffectedGeneticsString", default=1, 
-                    type="integer", help="Proportion of traits affected by 
+                    type="double", help="Proportion of traits affected by 
                     the genetic variant effects [default: %default]."),
         make_option(c("--distBetaGenetic"), action="store", 
                     dest="distBetaGenetic", default="norm", 
@@ -199,7 +198,7 @@ simulatePhenotypes <- function() {
                     help="Standard deviation/distance from midpoint of 
                     normal/uniform distribution for effect sizes of genetic 
                     variant effects [default: %default]."),
-        
+
         make_option(c("--NrFixedEffects"), action="store", 
                     dest="NrFixedEffects", default=1, type="integer", 
                     help="Number of different confounder effects to simulate: 
@@ -291,7 +290,7 @@ simulatePhenotypes <- function() {
                     effect sizes of confounders;  for more than one type of 
                     confounders, provide values separated by commas, e.g. 
                     '1,2', [default: %default]"),
-        
+
         make_option(c("--pcorr"), action="store", dest="pcorr", 
                     default=0.8, type="double", help="Correlation strength of
                     correlated noise effects [default: %default]."),
@@ -302,7 +301,7 @@ simulatePhenotypes <- function() {
                     correlation matrix for simulation of correlated backgound 
                     effect will be read from file; file should NOT contain an 
                     index or header column [default: %default]."),
-        
+
         make_option(c("--meanNoiseBg"), action="store", dest="meanNoiseBg", 
                     default=0, type="double", help="Mean of the normal 
                     distribution for simulating observational noise effects 
@@ -311,7 +310,7 @@ simulatePhenotypes <- function() {
                     default=1, type="double", help="Standard deviation of the 
                     normal distribution for simulating observational noise
                     effects [default: %default]."),
-        
+
         make_option(c("--sampleID"), action="store", dest="sampleID", 
                     default="ID_", type="character", help="Prefix for naming 
                     simulated samples; will be followed by sample number from 
@@ -327,7 +326,7 @@ simulatePhenotypes <- function() {
                     default="SNP_", type="character", help="Prefix for naming 
                     simulated snps; will be followed by SNP number from 1 to 
                     --tNrSNPs when constructing SNP IDs [default: %default]."),
-        
+
         make_option(c("--seed"), action="store", dest="seed", 
                     default=219453, type="integer", help="Seed to initialise 
                     random number generator [default: %default]."),
@@ -335,7 +334,34 @@ simulatePhenotypes <- function() {
                     default=FALSE, type="logical", help="If set, progress 
                     messages about simulation steps are printed to standard out
                     [default: %default]."),
-        
+
+        make_option(c("--nonlinear"), action="store", dest="nonlinear", 
+                    default=NULL, type="character", 
+                    help="Nonlinear transformation method; one of exp, log, or 
+                    sqrt; if log, base can be specified; non-linear 
+                    transformation is optional, default is NULL ie no 
+                    transformation"),
+        make_option(c("--logbase"), action="store", dest="logbase", default=10,
+                    type="integer", help="Base of logarithm for non-linear phenotype
+                    transformation"),
+        make_option(c("--expbase"), action="store", dest="expbase", 
+                    default=NULL,
+                    type="double", help="Base of exponential function for
+                    non-linear phenotype transformation; if non given, Euler's
+                    number is used (exp)"),
+        make_option(c("--power"), action="store", dest="power", default=2,
+                    type="double", help="Power of polynomial non-linear phenotype
+                    transformation"),
+        make_option(c("--proportionNonlinear"), action="store", default=0,
+                    dest="proportionNonlinear", type="double", help="proportion
+                    of the phenotype to be non-linear"),
+        make_option(c("--transfromNegNonlinear"), action="store", default='abs',
+                    dest="transformNeg", type="character", help="transformation
+                    method for negative values in non linear phenotype
+                    transformation. One of abs (absolute value) or set0 (set all
+                    negative values to zero). If nonlinear==log and 
+                    transformNegNonlinear==set0, negative values set to 1e-5."),
+
         make_option(c("--directory"), action="store", 
                     dest="directory", default=NULL, type="character", help=
                     "Absolute path (no tilde expansion) to parent directory
@@ -359,6 +385,13 @@ simulatePhenotypes <- function() {
                     help="Output format of results: when flag set, output saved 
                     as .rds;  at least one of -saveTable or -saveRDS needs to be 
                     set [default: %default]."),
+        make_option(c("--saveLIMMBO"), action="store_true", 
+                    dest="saveAsLIMMBO", default=FALSE, type="logical",
+                    help="When flag is set, simulated data is saved in
+                    LiMMBo format, i.e. Ysim_limmbo.csv (phenotype file),
+                    Covs_limmbo.csv (covariates file), Kinship_limmbo.csv
+                    (kinship file) and genotypes_limmbo.csv (genotype file)
+                    [default: %default]."),
         make_option(c("--savePLINK"), action="store_true", 
                     dest="saveAsPLINK", default=FALSE, type="logical", 
                     help="When flag is set, simulated data is saved in  
@@ -372,7 +405,7 @@ simulatePhenotypes <- function() {
                     Covs_gemma.txt (covariates file), Kinship_gemma.txt 
                     (kinship file) and genotypes.gemma (genotype file)
                     [default: %default]."),
-        make_option(c("--noGemmaIntercept"), 
+        make_option(c("--noGemmaIntercept"),
                     action="store_false", dest="intercept_gemma", default=TRUE, 
                     type="logical", help ="if --saveGEMMA: when modeling an 
                     intercept term in gemma, a column of 1's has to be appended 
@@ -405,32 +438,37 @@ simulatePhenotypes <- function() {
     if(!args$saveAsRDS && !args$saveAsTable) {
         stop("At least one of --saveRDS or --saveTable need to be set")
     }
-    
+
+    if (grepl("~", args$directory)) {
+        stop("directory contains ~: path expansion not guaranteed on 
+             every platform (see path.expand{base}), please provide full file
+             path to the output directory")
+    }
     NrConfounders <- commaList2vector(args$NrConfoundersString)
     SNPfrequencies <- commaList2vector(args$SNPfrequencyString)
     pIndependentConfounders <- 
-    commaList2vector(args$pIndependentConfoundersString)
+        commaList2vector(args$pIndependentConfoundersString)
     pTraitIndependentConfounders <-
-    commaList2vector(args$pTraitIndependentConfoundersString)
+        commaList2vector(args$pTraitIndependentConfoundersString)
     pTraitsAffectedConfounders <-
-    commaList2vector(args$pTraitsAffectedConfoundersString)
-    keepSameIndependentConfounders <- 
-    commaList2vector(args$keepSameIndependentConfoundersString, 
+        commaList2vector(args$pTraitsAffectedConfoundersString)
+    keepSameIndependentConfounders <-
+        commaList2vector(args$keepSameIndependentConfoundersString,
                                             type="logical")
-    distConfounders <- commaList2vector(args$distConfoundersString, 
-                                        type="character") 
+    distConfounders <- commaList2vector(args$distConfoundersString,
+                                        type="character")
     mConfounders <- commaList2vector(args$mConfoundersString)
     sdConfounders <- commaList2vector(args$sdConfoundersString)
     catConfounders <- commaList2vector(args$catConfoundersString)
     probConfounders <- commaList2vector(args$probConfoundersString)
-    distBetaConfounders <- commaList2vector(args$distBetaConfoundersString, 
-                                            type="character") 
+    distBetaConfounders <- commaList2vector(args$distBetaConfoundersString,
+                                            type="character")
     mBetaConfounders <- commaList2vector(args$mBetaConfoundersString)
     sdBetaConfounders <- commaList2vector(args$sdBetaConfoundersString)
-    
+
     chr <- commaList2vector(args$chr_string)
     NrSNPsOnChromosome <- commaList2vector(args$NrSNPsOnChromosomeString)
-    
+
     if (args$verbose) {
         message("Output directory: ", args$directory)
         message("Subdirectory: ", args$outstring)
@@ -449,7 +487,7 @@ simulatePhenotypes <- function() {
         message("Number of causal SNPs: ", args$cNrSNP)
         message("Number of confounders: ", sum(NrConfounders))
     }
-    
+
     format <- NULL
     if (args$saveAsRDS) format <- c(format, "rds")
     if (args$saveAsTable) format <- c(format, "csv")
@@ -457,81 +495,89 @@ simulatePhenotypes <- function() {
     if (args$saveAsGEMMA) format <- c(format, "gemma")
     if (args$saveAsBIMBAM) format <- c(format, "bimbam")
     if (args$saveAsSNPTEST) format <- c(format, "snptest")
-    
+    if (args$saveAsLIMMBO) format <- c(format, "limmbo")
+
     if(tolower(args$kinshipFileDelimiter) == "tab") {
         args$kinshipFileDelimiter="\t"
     }
     if(tolower(args$genoFileDelimiter) == "tab") {
         args$genoFileDelimiter="\t"
     }
-    simulatedPheno <- runSimulation( N=args$NrSamples, P=args$NrPhenotypes, 
+    simulatedPheno <- runSimulation( N=args$NrSamples, P=args$NrPhenotypes,
                                      seed=args$seed,
                                      tNrSNP=args$tNrSNP, cNrSNP=args$cNrSNP,
                                      pTraitsAffectedGenetics=
                                          args$pTraitsAffectedGenetics,
                                      pTraitsAffectedConfounders=
                                          pTraitsAffectedConfounders,
-                                     NrConfounders=NrConfounders, 
+                                     NrConfounders=NrConfounders,
                                      NrFixedEffects=args$NrFixedEffects,
-                                     chr=chr, 
+                                     chr=chr,
                                      NrChrCausal=args$NrChrCausal,
                                      NrSNPsOnChromosome=NrSNPsOnChromosome,
                                      probabilities = args$probabilities,
-                                     oxgen=args$oxgen,
                                      skipFields=args$skipFields,
-                                     sampleID=args$sampleID, 
+                                     sampleID=args$sampleID,
                                      phenoID=args$phenoID,
-                                     genoFilePrefix=args$genoFilePrefix, 
-                                     genoFileSuffix=args$genoFileSuffix, 
+                                     genoFilePrefix=args$genoFilePrefix,
+                                     genoFileSuffix=args$genoFileSuffix,
                                      SNPfrequencies=SNPfrequencies,
                                      genoDelimiter=args$genoFileDelimiter,
                                      kinshipfile=args$kinshipfile,
                                      kinshipHeader=args$kinshipHeader,
                                      kinshipDelimiter=args$kinshipFileDelimiter,
-                                     standardise=args$standardise, 
-                                     genVar=args$genVar, 
+                                     standardise=args$standardise,
+                                     genVar=args$genVar,
                                      h2s=args$h2s, h2bg=args$h2bg,
                                      theta=args$theta, eta=args$eta,
-                                     noiseVar=args$noiseVar, 
-                                     delta=args$delta, rho=args$rho, 
+                                     noiseVar=args$noiseVar,
+                                     delta=args$delta, rho=args$rho,
                                      phi=args$phi,
                                      alpha=args$alpha,
-                                     gamma=args$gamma, 
+                                     gamma=args$gamma,
                                      pcorr=args$pcorr,
                                      corrmatfile=args$corrmatfile,
                                      pIndependentConfounders=
-                                         pIndependentConfounders, 
+                                         pIndependentConfounders,
                                      pTraitIndependentConfounders=
-                                        pTraitIndependentConfounders, 
+                                        pTraitIndependentConfounders,
                                      keepSameIndependentConfounders=
                                          keepSameIndependentConfounders,
                                      pIndependentGenetic=
-                                         args$pIndependentGenetic, 
+                                         args$pIndependentGenetic,
                                      pTraitIndependentGenetic=
-                                         args$pTraitIndependentGenetic, 
+                                         args$pTraitIndependentGenetic,
                                      keepSameIndependentSNPs=
                                          args$keepSameIndependentSNPs,
                                      distBetaGenetic=args$distBetaGenetic,
-                                     mBetaGenetic=args$mBetaGenetic, 
+                                     mBetaGenetic=args$mBetaGenetic,
                                      sdBetaGenetic=
                                          args$sdBetaGenetic,
-                                     distConfounders=distConfounders, 
-                                     mConfounders=mConfounders, 
+                                     distConfounders=distConfounders,
+                                     mConfounders=mConfounders,
                                      sdConfounders=sdConfounders,
                                      catConfounders=catConfounders,
                                      probConfounders=probConfounders,
                                      distBetaConfounders=distBetaConfounders,
-                                     mBetaConfounders=mBetaConfounders, 
+                                     mBetaConfounders=mBetaConfounders,
                                      sdBetaConfounders=sdBetaConfounders,
-                                     meanNoiseBg=args$meanNoiseBg, 
+                                     meanNoiseBg=args$meanNoiseBg,
                                      sdNoiseBg=args$sdNoiseBg,
+                                     nonlinear=args$nonlinear,
+                                     logbase=args$logbase,
+                                     expbase=args$expbase,
+                                     power=args$power,
+                                     transformNeg=
+                                         args$transformNegNonlinear,
+                                     proportionNonlinear=
+                                         args$proportionNonlinear,
                                      verbose=args$verbose)
-    
-    outdir <- savePheno(simulatedPheno, 
+
+    outdir <- savePheno(simulatedPheno,
                         format=format,
                         saveIntermediate=args$saveIntermediate,
                         intercept_gemma=args$intercept_gemma,
-                        outstring=args$outstring, 
-                        directory=args$directory, 
+                        outstring=args$outstring,
+                        directory=args$directory,
                         verbose=args$verbose)
 }

@@ -4,14 +4,15 @@
 \alias{runSimulation}
 \title{Run phenotype simulation.}
 \usage{
-runSimulation(N, P, genVar = NULL, h2s = NULL, theta = 0.8, h2bg = NULL,
-  eta = 0.8, noiseVar = NULL, rho = NULL, delta = NULL, gamma = 0.8,
-  phi = NULL, alpha = 0.8, tNrSNP = 5000, cNrSNP = 20,
-  SNPfrequencies = c(0.1, 0.2, 0.4), genotypefile = NULL, format = NULL,
-  genoFilePrefix = NULL, genoFileSuffix = NULL, genoDelimiter = ",",
-  skipFields = NULL, probabilities = FALSE, oxgen = FALSE, chr = NULL,
-  NrSNPsOnChromosome = NULL, NrChrCausal = NULL, kinshipfile = NULL,
-  kinshipHeader = FALSE, kinshipDelimiter = ",", standardise = TRUE,
+runSimulation(N, P, genVar = NULL, h2s = NULL, theta = 0.8,
+  h2bg = NULL, eta = 0.8, noiseVar = NULL, rho = NULL,
+  delta = NULL, gamma = 0.8, phi = NULL, alpha = 0.8,
+  tNrSNP = 5000, cNrSNP = 20, SNPfrequencies = c(0.1, 0.2, 0.4),
+  genotypefile = NULL, format = NULL, genoFilePrefix = NULL,
+  genoFileSuffix = NULL, genoDelimiter = ",", skipFields = NULL,
+  probabilities = FALSE, chr = NULL, NrSNPsOnChromosome = NULL,
+  NrChrCausal = NULL, kinshipfile = NULL, kinshipHeader = FALSE,
+  kinshipDelimiter = ",", standardise = TRUE,
   distBetaGenetic = "norm", mBetaGenetic = 0, sdBetaGenetic = 1,
   pTraitsAffectedGenetics = 1, pIndependentGenetic = 0.4,
   pTraitIndependentGenetic = 0.2, keepSameIndependentSNPs = FALSE,
@@ -21,8 +22,11 @@ runSimulation(N, P, genVar = NULL, h2s = NULL, theta = 0.8, h2bg = NULL,
   mBetaConfounders = 0, sdBetaConfounders = 1,
   pTraitsAffectedConfounders = 1, pIndependentConfounders = 0.4,
   pTraitIndependentConfounders = 0.2,
-  keepSameIndependentConfounders = FALSE, pcorr = 0.8, corrmatfile = NULL,
-  meanNoiseBg = 0, sdNoiseBg = 1, sampleID = "ID_", phenoID = "Trait_",
+  keepSameIndependentConfounders = FALSE, pcorr = 0.8,
+  corrmatfile = NULL, meanNoiseBg = 0, sdNoiseBg = 1,
+  nonlinear = NULL, logbase = 10, expbase = NULL, power = NULL,
+  customTransform = NULL, transformNeg = "abs",
+  proportionNonlinear = 0, sampleID = "ID_", phenoID = "Trait_",
   snpID = "SNP_", seed = 219453, verbose = FALSE)
 }
 \arguments{
@@ -71,9 +75,11 @@ sample.}
 \item{genotypefile}{Needed when reading external genotypes (into memory), 
 path/to/genotype file [string] in format specified by \link{format}.}
 
-\item{format}{Needed when reading external genotypes (into memory), specifies 
-the format of the genotype data; has to be one of  plink, oxgen, genome, 
-bimbam and delim; for details see Details in \link{readStandardGenotypes}}
+\item{format}{Needed when reading external genotypes, specifies 
+the format of the genotype data; has to be one of plink, oxgen, genome, 
+bimbam and delim when reading files into memory, or one of oxgen, bimbam or
+delim if sampling genetic variants from file; for details see
+\link{readStandardGenotypes} and \link{getCausalSNPs}.}
 
 \item{genoFilePrefix}{Needed when sampling cuasal SNPs from file, full 
 path/to/chromosome-wise-genotype-file-ending-before-"chrChromosomeNumber" 
@@ -82,18 +88,17 @@ path/to/chromosome-wise-genotype-file-ending-before-"chrChromosomeNumber"
 \item{genoFileSuffix}{Needed when sampling causal SNPs from file, 
 following chromosome number including fileformat (e.g. ".csv") [string]}
 
-\item{genoDelimiter}{Field separator [string] of genotypefile or genoFile}
+\item{genoDelimiter}{Field separator [string] of genotypefile or genoFile if
+format == delim.}
 
 \item{skipFields}{Number [integer] of fields (columns) in to skip in 
-genoFilePrefix-genoFileSuffix-file. See details in \link{getCausalSNPs}.}
+genoFilePrefix-genoFileSuffix-file. See details in \link{getCausalSNPs} if
+format == delim.}
 
 \item{probabilities}{[bool]. If set to TRUE, the genotypes in the files 
 described by genoFilePrefix and genoFileSuffix are provided as triplets of 
 probablities (p(AA), p(Aa), p(aa)) and are converted into their expected 
 genotype frequencies by 0*p(AA) + p(Aa) + 2p(aa) via \link{probGen2expGen}.}
-
-\item{oxgen}{[bool] Is genoFilePrefix-genoFileSuffix file in oxgen format?
-See \link{readStandardGenotypes} for details.}
 
 \item{chr}{Numeric vector of chromosomes [integer] to chose NrCausalSNPs 
 from; only used when external genotype data is sampled i.e. 
@@ -200,6 +205,33 @@ simulation observational noise effects.}
 \item{sdNoiseBg}{Standard deviation [double] of the normal distributions for 
 the simulations of the observational noise effects.}
 
+\item{nonlinear}{nonlinear transformation method [string]; one exp 
+(exponential), log (logarithm), poly (polynomial), sqrt (squareroot) or 
+custom (user-supplied function); if log or exp, base can be specified; if 
+poly, power can be specified; if custom, a custom function (see for details). 
+Non-linear transformation is optional, default is NULL ie no transformation (see 
+details).}
+
+\item{logbase}{[int] base of logarithm for non-linear phenotype 
+transformation (see details).}
+
+\item{expbase}{[int] base of exponential function for non-linear phenotype 
+transformation (see details).}
+
+\item{power}{[double] power of polynomial function for non-linear phenotype 
+transformation.}
+
+\item{customTransform}{[function] custom transformation function accepting 
+a single argument.}
+
+\item{transformNeg}{[string] transformation method for negative values in non
+linear phenotype transformation. One of abs (absolute value) or set0 (set all 
+negative values to zero). If nonlinear==log and transformNeg==set0, negative
+values set to 1e-5}
+
+\item{proportionNonlinear}{[double] proportion of the phenotype to be non-
+linear (see details)}
+
 \item{sampleID}{Prefix [string] for naming samples (will be followed by 
 sample number from 1 to N when constructing sample IDs); only used if 
 genotypes/kinship are simulated/do not have sample IDs.}
@@ -222,13 +254,24 @@ ii) a named list with the final simulated phenotype components
 phenotype components (phenoComponentsIntermediate), iv) a named list of 
 parameters describing the model setup (setup) and v) a named list of raw 
 components (rawComponents) used for genetic effect simulation (genotypes 
-and/or kinship)
+and/or kinship, eigenvalues and eigenvectors of kinship)
 }
 \description{
 runSimulation wraps around setModel, the phenotype component functions 
 (genFixedEffects, genBgEffects, noiseBgEffects, noiseFixedEffects and 
 correlatedBgEffects), rescales each component and combines them into the 
 final phenotype. For details to all parameters, see the respective functions.
+}
+\details{
+Phenotypes are modeled under a linear additive model where
+Y = WA + BX + G + C + Phi, with WA the non-genetic covariates, BX the genetic
+variant effects, G the infinitesimal genetic effects, C the correlated 
+background effects and the Phi the observational noise. For more information
+on these components look at the respective function descriptions (see also)
+Optionally the phenotypes can be non-linearly transformed via:
+Y_trans = (1-alpha) x Y + alpha x f(Y). Alpha is the proportion of non-
+linearity of the phenotype and f is a non-linear transformation, and one of
+exp, log or sqrt.
 }
 \examples{
 # simulate phenotype of 100 samples, 10 traits from genetic and noise 
