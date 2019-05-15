@@ -96,7 +96,7 @@ simulatePhenotypes <- function() {
                     memory) in format specified by --format 
                     [default: %default]."),
         make_option(c("--format"), action="store", 
-                    dest="format", default=NULL, type="character", 
+                    dest="format", default='delim', type="character", 
                     help="Needed when --genotypefile or
                     --genoFilePrefix/--genoFileSuffix are specified; specifies  
                     format of the genotype data; if --genotypefile: has to be 
@@ -129,7 +129,11 @@ simulatePhenotypes <- function() {
                     dest="skipFields", default=NULL, type="integer", 
                     help="Number of fields (columns) to skip in genoFilePrefix-
                     genoFileSuffix file [default: %default]."),
-
+        make_option(c("--genoFileHeader"), action="store_true", 
+                    dest="header", default=FALSE,
+                    help="Use flag to indicate that genoFilePrefix-
+                    genoFileSuffix file has a header for format == 'delim'. 
+                    [default: %default]."),
         make_option(c("--chr"), action="store", 
                     dest="chr_string", default=NULL, type="character", 
                     help="Comma-separated list of chromosomes to draw causal 
@@ -517,6 +521,7 @@ simulatePhenotypes <- function() {
                                      NrSNPsOnChromosome=NrSNPsOnChromosome,
                                      probabilities = args$probabilities,
                                      skipFields=args$skipFields,
+                                     header=args$header,
                                      sampleID=args$sampleID,
                                      phenoID=args$phenoID,
                                      genoFilePrefix=args$genoFilePrefix,

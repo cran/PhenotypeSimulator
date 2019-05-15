@@ -1,5 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/PhenotypeSimulator)](https://cran.r-project.org/package=PhenotypeSimulator) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Downloads](http://cranlogs.r-pkg.org/badges/grand-total/PhenotypeSimulator?color=blue)](https://CRAN.R-project.org/package=PhenotypeSimulator)
+
 <i class="fa fa-map" aria-hidden="true"></i> PhenotypeSimulator
 ---------------------------------------------------------------
 
@@ -14,14 +16,18 @@ In quantitative genetics, genotype to phenotype mapping is commonly realised by 
 
 Full documentation of **PhenotypeSimulator** is available at <http://HannahVMeyer.github.io/PhenotypeSimulator/>.
 
-The current github version of *PhenotypeSimulator* is: 0.3.1 and can be installed via
+The current github version of *PhenotypeSimulator* is 0.3.3 and can be installed via
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("HannahVMeyer/PhenotypeSimulator")
 ```
 
-The current CRAN version of *PhenotypeSimulator* is: 0.2.2 (soon to be updated!)
+The current CRAN version of *PhenotypeSimulator* is 0.3.1 and can be installed via:
+
+``` r
+install.packages("PhenotypeSimulator")
+```
 
 A log of version changes can be found [here](https://github.com/HannahVMeyer/PhenotypeSimulator/blob/master/NEWS.md).
 
