@@ -1,11 +1,11 @@
-## ----setup, include=FALSE------------------------------------------------
+## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(echo = TRUE)
 
-## ---- echo=FALSE, fig.cap="\\label{fig:wallthickness}**Left ventricular wall thickness and contributing factors.** Left ventricular wall thickness was measured at more than 27k positions in a cohort of 1,185 healthy volunteers. The average wall thickness at each position is depicted in saturated colours (the mesh depicts the right ventricle for reference). Heart wall thickness is determined by an interplay of genetic (green arrows) and non-genetic factors (grey arrows). Additional correlation between positional thickness can be observed for measures in close spatial proximity.", fig.align='center'----
-knitr::include_graphics(system.file("extdata/vignettes/wallthickness-min.png",
-                                    package = "PhenotypeSimulator"))
+## ----wall, echo=FALSE, fig.cap="\\label{fig:wallthickness}**Left ventricular wall thickness and contributing factors.** Left ventricular wall thickness was measured at more than 27k positions in a cohort of 1,185 healthy volunteers. The average wall thickness at each position is depicted in saturated colours (the mesh depicts the right ventricle for reference). Heart wall thickness is determined by an interplay of genetic (green arrows) and non-genetic factors (grey arrows). Additional correlation between positional thickness can be observed for measures in close spatial proximity.", fig.align='center'----
+#knitr::include_graphics("../docs/articles/SimulationBasedOnExampleData_files/figure-html/wall-1.png")
+knitr::include_graphics("wallthickness-min.png")
 
-## ----load real data------------------------------------------------------
+## ----load real data-----------------------------------------------------------
 library(PhenotypeSimulator)
 library(ggplot2)
 
@@ -50,7 +50,7 @@ p_cat <- p_cat + geom_bar(aes(x=meassure)) +
 combine <- cowplot::plot_grid(p_cont, p_cat, nrow=2) 
 print(combine)
 
-## ----correlation phenotypes, eval=FALSE----------------------------------
+## ----correlation phenotypes, eval=FALSE---------------------------------------
 #  cor_pheno <- cor(pheno)
 #  gplots::heatmap.2(cor_pheno, trace="none", dendrogram="none", keysize=1,
 #                    col=colorRampPalette(c("white", "#5BBCD6")),
@@ -61,12 +61,12 @@ print(combine)
 #                    key.ylab="",
 #                    density.info="none")
 
-## ---- echo=FALSE, out.width='\\textwidth', fig.align='center',fig.cap="\\label{fig:corpheno}\\textbf{Correlation of left ventricular wall thickness measurements.}"----
+## ----pheno, echo=FALSE, out.width='\\textwidth', fig.align='center',fig.cap="\\label{fig:corpheno}\\textbf{Correlation of left ventricular wall thickness measurements.}"----
 cor_pheno <- cor(pheno)
-knitr::include_graphics(system.file("extdata/vignettes/cor_pheno-min.png",
-            package = "PhenotypeSimulator"))
+#knitr::include_graphics("../docs/articles/SimulationBasedOnExampleData_files/figure-html/pheno-1.png")
+knitr::include_graphics("cor_pheno-min.png")
 
-## ----data parameters-----------------------------------------------------
+## ----data parameters----------------------------------------------------------
 age_range <- range(covs$Age)
 
 weight_mean <- mean(covs$Weight)
@@ -81,7 +81,7 @@ sex_proportion_male <- length(which(covs$Sex==1))/nrow(covs)
 
 correlation <- quantile(unlist(cor_pheno[lower.tri(cor_pheno)]), 0.999)
 
-## ----simulate data-------------------------------------------------------
+## ----simulate data------------------------------------------------------------
 set.seed(25)
 covs_simulated <- noiseFixedEffects(N=100, P=1000, NrFixedEffects = 5, 
                                     NrConfounders = 1,
@@ -129,7 +129,7 @@ p_cat <- p_cat + geom_bar(aes(x=meassure)) +
 combine <- cowplot::plot_grid(p_cont, p_cat, nrow=2) 
 print(combine)
 
-## ----correlation simulated background, eval=FALSE------------------------
+## ----correlation simulated background, eval=FALSE-----------------------------
 #  gplots::heatmap.2(cor(background_simulated$correlatedBg), trace="none",
 #                    dendrogram="none",
 #                    keysize=1, col=colorRampPalette(c("white", "#5BBCD6")),
@@ -140,7 +140,7 @@ print(combine)
 #                    key.ylab="",
 #                    density.info="none")
 
-## ----load simulated background, echo=FALSE, out.width='\\textwidth', fig.align='center', fig.cap="\\label{fig:corsimulated}\\textbf{Correlation of simulated spatial proximity.}"----
-knitr::include_graphics(system.file("extdata/vignettes/cor_simulated-min.png",
-            package = "PhenotypeSimulator"))
+## ----background, load simulated background, echo=FALSE, out.width='\\textwidth', fig.align='center', fig.cap="\\label{fig:corsimulated}\\textbf{Correlation of simulated spatial proximity.}"----
+#knitr::include_graphics("../docs/articles/SimulationBasedOnExampleData_files/figure-html/background-1.png")
+knitr::include_graphics("cor_simulated-min.png")
 

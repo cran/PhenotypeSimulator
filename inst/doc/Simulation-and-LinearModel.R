@@ -1,9 +1,9 @@
-## ---- echo = FALSE, message=FALSE----------------------------------------
+## ---- echo = FALSE, message=FALSE---------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library("PhenotypeSimulator")
 library("ggplot2")
 
-## ---- eval=FALSE---------------------------------------------------------
+## ---- eval=FALSE--------------------------------------------------------------
 #  # load kinship data, add small value to diagonal for numerical stability and
 #  # do an eigendecomposition
 #  indir <- "~/data/hmeyer/Supplementary/CEU.0908.impute.files"
@@ -31,7 +31,7 @@ library("ggplot2")
 #  				  sep=""),
 #  			sep="\t", col.names=FALSE, row.names=FALSE)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ---- eval=FALSE--------------------------------------------------------------
 #  indir <- "/homes/hannah/data/hmeyer/Supplementary/CEU.0908.impute.files"
 #  
 #  # specify directory to save data; if it doesn't exist yet, create i.e. needs
@@ -69,13 +69,13 @@ library("ggplot2")
 #                             kinshipHeader=FALSE,
 #                             verbose = TRUE )
 
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## ---- eval=FALSE, echo=FALSE--------------------------------------------------
 #  savedir <- paste(system.file("extdata", package="PhenotypeSimulator"),
 #                              "/resultsSimulationAndLinearModel", sep="")
 #  saveRDS(simulation$phenoComponentsFinal,
 #          paste(savedir, "/simulation_phenoComponentsFinal.rds", sep=""))
 
-## ---- echo=FALSE---------------------------------------------------------
+## ---- echo=FALSE--------------------------------------------------------------
 savedir <- paste(system.file("extdata", package="PhenotypeSimulator"), 
                             "/resultsSimulationAndLinearModel", sep="")
 simulation <- list(
@@ -147,19 +147,19 @@ p_corr <- p_corr + geom_tile() +
             strip.text  =element_text(size=8))
 print(p_corr)
 
-## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## ---- echo=FALSE, eval=FALSE--------------------------------------------------
 #  ggsave(plot=p_corr,
 #          filename=paste(savedir, "/correlation_phenotype.pdf", sep=""),
 #          units="mm", width=86, height=60)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ---- eval=FALSE--------------------------------------------------------------
 #  # Save phenotypes, kinship and non-genetic covariates in csv and
 #  # GEMMA-specific format
 #  outdirectory <- savePheno(simulation, directory = datadir,
 #                              intercept_gemma=TRUE, format=c("csv", "gemma"),
 #                              saveIntermediate=TRUE)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ---- eval=FALSE--------------------------------------------------------------
 #  datadir="/homes/hannah/tmp/phenotypeSimulator"
 #  
 #  causalSNPs <- fread(paste(datadir, "/SNP_NrSNP10.csv", sep=""),
@@ -238,15 +238,16 @@ print(p_corr)
 #  			legend.position = "bottom",
 #              legend.direction = "horizontal")
 
-## ----echo=FALSE, eval=FALSE, out.width='100%'----------------------------
+## ----echo=FALSE, eval=FALSE, out.width='100%'---------------------------------
 #  ggsave(plot=p_qq,
 #  		filename=paste(savedir, "/gwas_results_gemma_qqplot.png", sep=""),
 #  		units="mm", width=86, height=100)
 
-## ---- echo=FALSE, fig.cap="\\label{fig:qqplot}Quantile-quantile plots of p-values observed from the multivariate linear mixed model (mvLMM, traits:all) and the univariate linear mixed models (uvLMM, traits: trait1/trait2/trait3) fitted to each of about eight million genome-wide SNPs (grey), including the ten SNPs for which a phenotype effect was modelled (green)."----
-knitr::include_graphics(paste(savedir, "/gwas_results_gemma_qqplot.png", sep=""))
+## ----qqplot, echo=FALSE, fig.cap="\\label{fig:qqplot}Quantile-quantile plots of p-values observed from the multivariate linear mixed model (mvLMM, traits:all) and the univariate linear mixed models (uvLMM, traits: trait1/trait2/trait3) fitted to each of about eight million genome-wide SNPs (grey), including the ten SNPs for which a phenotype effect was modelled (green)."----
+#knitr::include_graphics("../docs/articles/Simulation-and-LinearModel_files/figure-html/qqplot-1.png")
+knitr::include_graphics("gwas_results_gemma_qqplot.png")
 
-## ---- eval=FALSE---------------------------------------------------------
+## ---- eval=FALSE--------------------------------------------------------------
 #  sigSNPs <- dplyr::filter(pvalues, causal == "simulated causal",
 #                           observed < 5*10^-8)
 #  sigSNPs$observed_adjusted <- sigSNPs$observed
@@ -254,12 +255,12 @@ knitr::include_graphics(paste(savedir, "/gwas_results_gemma_qqplot.png", sep="")
 #      3*sigSNPs$observed[which(sigSNPs$trait != "all")]
 #  sigSNPs <- dplyr::filter(sigSNPs, observed_adjusted < 5*10^-8)
 
-## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## ---- echo=FALSE, eval=FALSE--------------------------------------------------
 #  write.table(sigSNPs,
 #              paste(savedir, "/sigSNPs.csv", sep=""),
 #              col.names=TRUE, row.names=FALSE, quote=FALSE, sep=",")
 
-## ----sigSNPs, echo=FALSE-------------------------------------------------
+## ----sigSNPs, echo=FALSE------------------------------------------------------
                         
 sigSNPs <- read.table(paste(savedir, "/sigSNPs.csv", sep=""), header=TRUE, 
                       sep=",")
@@ -269,7 +270,7 @@ knitr::kable(sigSNPs[, c(1,4,5,7)],
              table.attr = "id=\"sigSNPs\"",
              digits=40)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ---- eval=FALSE--------------------------------------------------------------
 #  # Read the SNPs simulated to have an effect on the phenotype and their SNP
 #  # effects
 #  SNPs <- read.csv(paste(datadir,"/SNP_NrSNP10.csv", sep=""),
@@ -285,10 +286,12 @@ knitr::kable(sigSNPs[, c(1,4,5,7)],
 #  SNPnames <- SNPnames[order(SNPnames)]
 #  simulated_withEffect <- dplyr::filter(pvalues, rsID %in% SNPnames)
 
-## ---- echo=FALSE, eval=FALSE---------------------------------------------
-#  write.table(simulated_withEffect, paste(savedir,"/simulated_withEffect.csv", sep=""), col.names=TRUE, quote=FALSE,row.names=FALSE)
+## ---- echo=FALSE, eval=FALSE--------------------------------------------------
+#  write.table(simulated_withEffect,
+#              paste(savedir,"/simulated_withEffect.csv", sep=""), col.names=TRUE,
+#              quote=FALSE,row.names=FALSE)
 
-## ---- echo=FALSE, eval=TRUE----------------------------------------------
+## ---- echo=FALSE, eval=TRUE---------------------------------------------------
 SNPeffect <- read.csv(paste(savedir,"/SNP_effects_NrSNP10.csv", sep=""),
                       row.names=1)
 SNPs <- read.csv(paste(savedir,"/SNP_NrSNP10.csv", sep=""),
@@ -321,7 +324,8 @@ simulated_withEffect$freq <- rep(minor[which(SNPnames %in% effects$rsID)], each=
 # plot association p-values in relation to the absolute value of the simulated 
 # effect sizes and the SNPs allele frequencies
 p <- ggplot(dplyr::filter(simulated_withEffect, trait != "all"))
-p <- p + geom_point(aes(x=freq, y=-log10(observed), color=abs(beta), shape=trait)) +
+p <- p +
+    geom_point(aes(x=freq, y=-log10(observed), color=abs(beta), shape=trait)) +
     geom_hline(yintercept=-log10(5*10^(-8)), color="darkgrey") +
     scale_color_gradientn(colours=c('#f0f9e8','#ccebc5','#a8ddb5','#7bccc4',
                                     '#4eb3d3','#2b8cbe','#08589e'),
@@ -332,7 +336,7 @@ p <- p + geom_point(aes(x=freq, y=-log10(observed), color=abs(beta), shape=trait
     theme_bw()
 print(p)
 
-## ----echo=FALSE, eval=FALSE, out.width='100%'----------------------------
+## ----echo=FALSE, eval=FALSE, out.width='100%'---------------------------------
 #  ggsave(plot=p,
 #  		filename=paste(savedir, "/effectsizes-freq-pvalues.pdf", sep=""),
 #  		units="mm", width=150, height=120)

@@ -1,9 +1,9 @@
-## ---- echo = FALSE, message=FALSE----------------------------------------
+## ---- echo = FALSE, message=FALSE---------------------------------------------
 library(knitr)
 opts_chunk$set(collapse = TRUE, comment = "#>")
 library("PhenotypeSimulator")
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # Set parameters
 genVar <- 0.4
 noiseVar <- 1- genVar
@@ -42,7 +42,7 @@ Y <- scale(genBg_shared_scaled$component + noiseBg_shared_scaled$component +
 # transform phenotype non-linearly
 Y_nl <- transformNonlinear(Y, alpha=0.7, method="exp")
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # simulate phenotype with population structure and observational noise effects 
 # only
 
@@ -56,7 +56,7 @@ phenotype <- runSimulation(N = 100, P = 15,  tNrSNP = 10000,
                            verbose = TRUE, nonlinear="exp", 
                            proportionNonlinear = 0.7)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # read genotypes from external file
 # use one of the sample genotype file provided in the 
 # extdata/genotypes/subfolders (e.g.extdata/genotypes/hapgen )
@@ -150,7 +150,7 @@ Y <- scale(genBg_shared_scaled$component + noiseBg_shared_scaled$component +
         correlatedBg_scaled$component)
 
 
-## ---- tidy=TRUE, tidy.opts = list(width.cutoff = 60)---------------------
+## ---- tidy=TRUE, tidy.opts = list(width.cutoff = 60)--------------------------
 # simulate phenotype with the same five phenotype components and settings as 
 # above; display progress via verbose=TRUE
 phenotype <- runSimulation(N = 100, P = 15, genotypefile=genotypefile, 
@@ -170,7 +170,7 @@ phenotype <- runSimulation(N = 100, P = 15, genotypefile=genotypefile,
                            verbose = TRUE )
 
 
-## ---- echo=FALSE---------------------------------------------------------
+## ---- echo=FALSE--------------------------------------------------------------
 # show proportion of variance of the different phenotype components in the 
 # final phenotype
 varGenFixed <- t(phenotype$varComponents
@@ -200,7 +200,7 @@ colnames(totalPropVariance) <- c("shared effect", "independent effect",
 knitr::kable(totalPropVariance, caption="Proportion of variance explained
              by the different phenotype components")
 
-## ---- fig.show='hold', fig.height=3.4, fig.width=3.4---------------------
+## ---- fig.show='hold', fig.height=3.4, fig.width=3.4--------------------------
 ### show 'image' of phenotype and correlation between phenotypic traits
 image(t(phenotype$phenoComponentsFinal$Y), main="Phenotype: [samples x traits]", 
       axes=FALSE, cex.main=0.8)
@@ -211,12 +211,12 @@ image(cor(phenotype$phenoComponentsFinal$Y),
 mtext(side = 1, text = "Traits", line = 1)
 mtext(side = 2, text = "Traits", line = 1)
 
-## ---- eval = FALSE-------------------------------------------------------
+## ---- eval = FALSE------------------------------------------------------------
 #  out <- savePheno(phenotype, directory="/tmp",
 #                   outstring="test_simulation",
 #                   format=c("csv", "plink"), verbose=FALSE)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## a) Draw cuasal SNPs from a simulated genotype matrix
 # simulate 10,000 bi-allelic SNP genotypes for 100 samples with randomly drawn 
 # allele frequencies of 0.05, 0.1, 0.3 and 0.4. 
@@ -229,7 +229,7 @@ genotypes <- simulateGenotypes(N = 100, NrSNP = 10000,
 causalSNPs <- getCausalSNPs(N=100, NrCausalSNPs = 10, 
                             genotypes = genotypes$genotypes)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## b) Draw SNPs from external genotype files: 
 # read genotypes from external file
 # use one of the sample genotype file provided in the 
@@ -249,7 +249,7 @@ causalSNPsFromFile <- getCausalSNPs(N = 100, NrCausalSNPs = 10,
                                     genotypes=genotypes$genotypes)
                                     
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## c) draw 10 causal SNPs from external genotype files: sample 10 SNPs from 
 ## chromosome 22
 # use sample genotype file provided in the extdata/genotypes folder
@@ -263,7 +263,7 @@ causalSNPsSampledFromFile <- getCausalSNPs(N = 10, NrCausalSNPs = 10, chr = 22,
                                     genoFileSuffix = genoFileSuffix,  
                                     delimiter = ",", verbose=TRUE)
 
-## ---- fig.show='hold'----------------------------------------------------
+## ---- fig.show='hold'---------------------------------------------------------
 # create genetic variant effects with 20% of SNPs having a specific effect, 
 # affecting 40% of all simulated traits
 fixedGenetic <- geneticFixedEffects(X_causal = causalSNPsFromFile, 
@@ -271,7 +271,7 @@ fixedGenetic <- geneticFixedEffects(X_causal = causalSNPsFromFile,
                                     pIndependentGenetic = 0.2, 
                                     pTraitIndependentGenetic = 0.4)
 
-## ---- fig.show='hold', echo=FALSE, fig.height=3.4, fig.width=3.4---------
+## ---- fig.show='hold', echo=FALSE, fig.height=3.4, fig.width=3.4--------------
 image(fixedGenetic$shared, main="Shared genetic variant effects", axes=FALSE, 
       cex.main=0.8)
 mtext(side = 1, text = "Samples", line = 1)
@@ -282,7 +282,7 @@ mtext(side = 1, text = "Samples", line = 1)
 mtext(side = 2, text = "Traits", line = 1)
 
 
-## ---- fig.show='hold'----------------------------------------------------
+## ---- fig.show='hold'---------------------------------------------------------
 ## a) Estimate kinship from simulated genotypes
 genotypes <- simulateGenotypes(N = 100, NrSNP = 10000, 
                                frequencies = c(0.05, 0.1, 0.3,0.4), 
@@ -299,7 +299,7 @@ kinshipFromFile <- getKinship(N=50, kinshipfile = kinshipFile,
 
 genBg <- geneticBgEffects(N=100, kinship = kinship, P = 15)
 
-## ---- fig.show='hold', echo=FALSE, fig.height=3.4, fig.width=3.4---------
+## ---- fig.show='hold', echo=FALSE, fig.height=3.4, fig.width=3.4--------------
 image(genBg$shared, main="Shared infinitesimal genetic effects", axes=FALSE, 
       cex.main=0.8)
 mtext(side = 1, text = "Samples", line = 1)
@@ -309,7 +309,7 @@ image(genBg$independent, main="Independent infinitesimal genetic effects",
 mtext(side = 1, text = "Samples", line = 1)
 mtext(side = 2, text = "Traits", line = 1)
 
-## ---- fig.show='hold'----------------------------------------------------
+## ---- fig.show='hold'---------------------------------------------------------
 # create 1 non-genetic covariate effect affecting 30% of all simulated traits. The effect 
 # follows a uniform distribution between 30 and 40  (resembling for instance age 
 # in a study cohort).
@@ -335,7 +335,7 @@ fixedNoiseBinomial <- noiseFixedEffects(N = 100, P = 10, NrConfounders = 1,
                                         distConfounders = "bin", 
                                         probConfounders = 0.5)
 
-## ---- fig.show='hold', echo=FALSE, fig.height=3.5, fig.width=4-----------
+## ---- fig.show='hold', echo=FALSE, fig.height=3.5, fig.width=4----------------
 image(fixedNoiseUniform$independent, 
       main="Independent non-genetic covariate effects\n(uniform confounder dist)", 
       axes=FALSE,  cex.main=0.8)
@@ -360,7 +360,7 @@ image(fixedNoiseBinomial$shared,
 mtext(side = 1, text = "Samples", line = 1)
 mtext(side = 2, text = "Traits", line = 1)
 
-## ---- fig.show='hold', fig.height=3.4, fig.width=3.4---------------------
+## ---- fig.show='hold', fig.height=3.4, fig.width=3.4--------------------------
 # simulate correlated noise effect for 10 traits with top-level 
 # correlation of 0.8
 correlatedNoise <- correlatedBgEffects(N = 100, P = 10, pcorr = 0.8 )
@@ -376,11 +376,11 @@ image(correlatedNoise$correlatedBg, main="Correlated effects",  axes=FALSE,
 mtext(side = 1, text = "Samples", line = 1)
 mtext(side = 2, text = "Traits", line = 1)
 
-## ----fig.show='hold'-----------------------------------------------------
+## ----fig.show='hold'----------------------------------------------------------
 # simulate a noise random effect for 10 traits
 noiseBg <- noiseBgEffects(N = 100, P = 10, mean = 0, sd = 1)
 
-## ---- fig.show='hold', echo=FALSE, fig.height=3.4, fig.width=3.4---------
+## ---- fig.show='hold', echo=FALSE, fig.height=3.4, fig.width=3.4--------------
 image(noiseBg$shared, main="Shared observational noise effects", axes=FALSE, 
       cex.main=0.8)
 mtext(side = 1, text = "Samples", line = 1)
